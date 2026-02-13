@@ -6,7 +6,7 @@
     <title>【過年生存人格】你在家族中是什麼角色？</title>
     <!-- 引入字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-    <!-- 引入 html2canvas (使用穩定版本) -->
+    <!-- 引入 html2canvas (建議使用最新穩定版) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -57,7 +57,7 @@
             height: 150px;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 50 Q25 25 50 50 T90 50' stroke='%23ffb300' stroke-width='2' fill='none' opacity='0.3'/%3E%3C/svg%3E");
             background-size: 50px 50px;
-            pointer-events: none; /* 關鍵：讓點擊穿透 */
+            pointer-events: none; /* 讓點擊穿透 */
             z-index: 0;
         }
 
@@ -68,7 +68,7 @@
             animation: fall linear infinite;
             opacity: 0;
             z-index: 99;
-            pointer-events: none; /* 關鍵：讓點擊穿透 */
+            pointer-events: none; /* 讓點擊穿透 */
         }
         @keyframes fall {
             0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
@@ -136,14 +136,14 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            z-index: 50; /* 確保按鈕層級夠高 */
+            z-index: 50; /* 確保按鈕在最上層 */
         }
         .btn:active { transform: scale(0.98); }
         .btn:disabled { opacity: 0.7; cursor: wait; filter: grayscale(50%); }
 
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
         
-        /* 綠色按鈕 (生成卡片) */
+        /* 綠色分享按鈕 */
         .btn-green {
             background: linear-gradient(to bottom, #43a047, #2e7d32);
             border: 2px solid #a5d6a7;
@@ -194,7 +194,7 @@
         /* 結果頁 */
         #result-screen { padding: 0; background: var(--border-color); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         
-        /* 截圖範圍與顯示區域合一 */
+        /* 截圖範圍 (隱藏在畫面外，但可被渲染) */
         #capture-wrapper {
             background-color: #fffbf0;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d32f2f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
@@ -220,7 +220,6 @@
         .bl { bottom: 15px; left: 15px; border-bottom: 4px solid var(--primary); border-left: 4px solid var(--primary); border-radius: 0 0 0 10px; }
         .br { bottom: 15px; right: 15px; border-bottom: 4px solid var(--primary); border-right: 4px solid var(--primary); border-radius: 0 0 10px 0; }
 
-        /* 動畫 */
         .reveal-item { opacity: 0; transform: translateY(20px); animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         .reveal-delay-1 { animation-delay: 0.2s; }
         .reveal-delay-2 { animation-delay: 0.4s; }
@@ -261,7 +260,7 @@
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             z-index: 9999;
             display: none;
             flex-direction: column;
@@ -283,7 +282,7 @@
         .modal-tip {
             color: #fff;
             margin-bottom: 15px;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
             text-align: center;
             animation: pulse 2s infinite;
@@ -297,6 +296,7 @@
             padding: 10px 30px;
             border-radius: 50px;
             cursor: pointer;
+            font-size: 1rem;
         }
 
         @keyframes pulse { 0% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.8; transform: scale(1); } }
@@ -310,7 +310,7 @@
 
 <!-- 圖片彈出視窗 -->
 <div id="image-modal">
-    <div class="modal-tip">👆 請長按圖片，選擇分享或儲存 👆</div>
+    <div class="modal-tip">👇 請長按圖片，儲存或分享 👇</div>
     <img id="generated-image" alt="測驗結果" />
     <button class="modal-close" onclick="closeModal()">關閉視窗</button>
 </div>
@@ -355,9 +355,8 @@
     <!-- 3. 結果頁 -->
     <div id="result-screen" class="hidden">
         
-        <!-- 截圖範圍 (隱藏在畫面外，但可被渲染) -->
+        <!-- 截圖範圍 (隱藏在畫面外) -->
         <div id="capture-wrapper">
-            <!-- 內嵌燈籠 -->
             <div class="lantern left"></div>
             <div class="lantern right"></div>
 
@@ -500,61 +499,84 @@
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('progress').style.width = `100%`;
         
-        // 隱藏全域燈籠，只顯示卡片內的
         document.getElementById('global-lantern-l').style.display = 'none';
         document.getElementById('global-lantern-r').style.display = 'none';
         
         createConfetti();
     }
 
-    // 生成並顯示圖片到 Modal
+    // 終極 iOS 修復版：使用 Clone Node + 離屏渲染
     function generateAndShowImage() {
         const btn = document.getElementById('share-btn');
         const originalText = btn.innerText;
         btn.innerText = "⟳ 製作卡片中...";
         btn.disabled = true;
 
-        const targetElement = document.getElementById('capture-wrapper');
+        // 1. 創建一個臨時容器，用於生成圖片 (避免受當前頁面捲動或樣式影響)
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'fixed';
+        tempContainer.style.top = '-9999px';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.width = '480px'; // 固定寬度，確保排版一致
+        tempContainer.style.zIndex = '-1';
         
-        // 強制確保截圖區塊是可見的
-        targetElement.style.display = 'block';
+        // 2. 複製目標內容
+        const sourceElement = document.getElementById('capture-wrapper');
+        const clone = sourceElement.cloneNode(true);
+        
+        // 移除 id 避免衝突
+        clone.id = 'capture-clone';
+        
+        // 針對 clone 進行樣式微調 (確保展開)
+        clone.style.display = 'block';
+        clone.style.transform = 'none';
+        
+        // 暫停 clone 內的所有動畫
+        const allAnimated = clone.querySelectorAll('*');
+        allAnimated.forEach(el => {
+            el.style.animation = 'none';
+            el.style.transition = 'none';
+            if(el.classList.contains('reveal-item')) {
+                el.style.opacity = '1';
+                el.style.transform = 'none';
+            }
+        });
 
-        html2canvas(targetElement, {
+        tempContainer.appendChild(clone);
+        document.body.appendChild(tempContainer);
+
+        // 3. 執行截圖
+        // iOS Safari 對過大圖片或 scale 會有問題，這裡設定適當的 scale
+        html2canvas(clone, {
             backgroundColor: "#fffbf0",
-            scale: 2, 
+            scale: 2, // 2倍解析度
             useCORS: true,
-            scrollX: 0,
-            scrollY: 0,
-            onclone: (clonedDoc) => {
-                const clonedTarget = clonedDoc.getElementById('capture-wrapper');
-                // 暫停燈籠動畫
-                const lanterns = clonedTarget.querySelectorAll('.lantern');
-                lanterns.forEach(l => l.style.animation = 'none');
-                
-                // 強制顯示所有動畫元素
-                const items = clonedTarget.querySelectorAll('.reveal-item');
-                items.forEach(item => {
-                    item.style.opacity = '1';
-                    item.style.transform = 'none';
-                    item.style.animation = 'none';
-                });
+            logging: false, // 關閉 log 提升效能
+            width: 480, // 強制寬度
+            windowWidth: 480,
+            onclone: (doc) => {
+                // 這裡已經在上面處理過 clone 了，通常不需要再做太多
             }
         }).then(canvas => {
             const dataUrl = canvas.toDataURL("image/png");
             
-            // 設置圖片到 Modal
-            document.getElementById('generated-image').src = dataUrl;
-            
             // 顯示 Modal
+            document.getElementById('generated-image').src = dataUrl;
             document.getElementById('image-modal').classList.add('show');
+            
+            // 清理
+            document.body.removeChild(tempContainer);
             
             // 恢復按鈕
             btn.innerText = originalText;
             btn.disabled = false;
 
         }).catch(err => {
-            console.error(err);
-            alert("圖片製作失敗，請重新整理試試！");
+            console.error("截圖失敗:", err);
+            alert("圖片製作遇到問題，請稍後再試 (Error: " + err.message + ")");
+            if (document.body.contains(tempContainer)) {
+                document.body.removeChild(tempContainer);
+            }
             btn.innerText = originalText;
             btn.disabled = false;
         });
