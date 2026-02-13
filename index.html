@@ -15,6 +15,10 @@
             --gold: #ffb300;
             --dark-gold: #bfa36f;
             --jade-green: #00695c;
+            --pink: #f48fb1;
+            --pink-dark: #c2185b;
+            --yellow: #fff176;
+            --yellow-dark: #fbc02d;
             --text: #4a0e0e;
             --border-color: #590d0d;
         }
@@ -87,7 +91,7 @@
             flex-direction: column;
         }
 
-        /* 燈籠 */
+        /* 燈籠樣式 - 共用 */
         .lantern {
             position: absolute;
             top: -10px;
@@ -136,8 +140,30 @@
 
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
         .btn-gold { background: linear-gradient(to bottom, #ffca28, #ffb300); color: #4e342e; border: 2px solid #ffd54f; box-shadow: 0 4px 0 #bfa36f; }
-        .btn-jade { background: linear-gradient(to bottom, #26a69a, #00695c); border: 2px solid #80cbc4; box-shadow: 0 4px 0 #004d40; }
-        .btn-rouge { background: linear-gradient(to bottom, #ef5350, #d32f2f); border: 2px solid #ffcdd2; box-shadow: 0 4px 0 #b71c1c; }
+        
+        /* 綠色分享按鈕 */
+        .btn-green {
+            background: linear-gradient(to bottom, #43a047, #2e7d32); /* 鮮明綠到深綠 */
+            border: 2px solid #a5d6a7;
+            box-shadow: 0 4px 0 #1b5e20;
+        }
+
+        /* 桃花粉 - 戀愛指南 */
+        .btn-pink { 
+            background: linear-gradient(to bottom, #f06292, #ec407a); 
+            border: 2px solid #f8bbd0; 
+            box-shadow: 0 4px 0 #880e4f; 
+            color: #fff;
+        }
+
+        /* 活力黃 - 課程 */
+        .btn-yellow { 
+            background: linear-gradient(to bottom, #fff176, #fbc02d); 
+            border: 2px solid #fff9c4; 
+            box-shadow: 0 4px 0 #f57f17; 
+            color: #4e342e; /* 深褐字 */
+        }
+
         .btn-outline { background: transparent; border: 1px solid rgba(0,0,0,0.1); color: #888; box-shadow: none; margin-top: 20px; font-size: 0.9rem; }
 
         .hidden { display: none !important; }
@@ -167,13 +193,17 @@
         .result-card {
             background: #fff;
             width: 100%;
-            padding: 60px 40px 150px 40px; 
+            /* 上方留白給燈籠，下方留白給版權 */
+            padding: 80px 40px 150px 40px; 
             text-align: center;
             position: relative;
             background-color: #fffbf0;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d32f2f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             border-bottom: 6px solid var(--gold);
         }
+
+        /* 針對截圖的燈籠定位 */
+        .result-card .lantern { top: -20px; }
 
         .corner-decor { position: absolute; width: 50px; height: 50px; pointer-events: none; }
         .tl { top: 15px; left: 15px; border-top: 4px solid var(--primary); border-left: 4px solid var(--primary); border-radius: 10px 0 0 0; }
@@ -189,12 +219,8 @@
         .reveal-delay-4 { animation-delay: 0.8s; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
-        /* 關鍵修正：Snapshot 模式下強制顯示所有元素，避免截圖空白 */
-        .snapshot-mode .reveal-item {
-            opacity: 1 !important;
-            transform: none !important;
-            animation: none !important;
-        }
+        /* Snapshot 模式 */
+        .snapshot-mode .reveal-item { opacity: 1 !important; transform: none !important; animation: none !important; }
 
         .role-badge { background: var(--text); color: var(--gold); padding: 5px 15px; font-weight: 700; border-radius: 4px; display: inline-block; margin-bottom: 10px; font-size: 0.9rem; letter-spacing: 1px; border: 1px solid var(--gold); }
         .role-title { font-family: 'Noto Sans TC', sans-serif; font-weight: 900; font-size: 3.5rem; color: var(--primary); margin: 5px 0; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
@@ -227,7 +253,7 @@
         #generated-image-wrap {
             position: relative;
             width: 100%;
-            display: none; /* 初始隱藏，生成後顯示 */
+            display: none; 
         }
         
         #generated-image {
@@ -245,8 +271,9 @@
 <div id="confetti-container"></div>
 
 <div id="app">
-    <div class="lantern left"></div>
-    <div class="lantern right"></div>
+    <!-- 全域燈籠 (首頁與測驗頁顯示) -->
+    <div class="lantern left" id="global-lantern-l"></div>
+    <div class="lantern right" id="global-lantern-r"></div>
 
     <!-- 1. 首頁 -->
     <div id="home-screen" class="fade-in">
@@ -286,6 +313,9 @@
         <!-- DOM 渲染區 (生成圖片後會隱藏) -->
         <div id="dom-result-area">
             <div class="result-card" id="capture-target">
+                <!-- 內嵌燈籠 (為了截圖) -->
+                <div class="lantern left"></div><div class="lantern right"></div>
+                
                 <div class="corner-decor tl"></div><div class="corner-decor tr"></div><div class="corner-decor bl"></div><div class="corner-decor br"></div>
                 
                 <div class="reveal-item"><div class="role-badge">經 LuvBar 測試你的角色是</div></div>
@@ -327,15 +357,15 @@
         <div class="footer-cta reveal-item reveal-delay-4">
             <p style="margin-bottom: 15px; font-size: 1.1rem; font-weight: bold;">覺得準嗎？分享給朋友一起測驗！</p>
             
-            <button class="btn btn-gold" id="share-btn" onclick="shareOrDownload()">
-                📸 一鍵分享測試結果
+            <button class="btn btn-green" id="share-btn" onclick="shareOrDownload()">
+                📸 直接分享給親友
             </button>
             
-            <button class="btn btn-jade" onclick="window.open('https://line.me/ti/g2/QdcpjzvhMBkwRsceEkFdyP97e-fNqA8Pn_9G2w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default', '_blank')">
+            <button class="btn btn-pink" onclick="window.open('https://line.me/ti/g2/QdcpjzvhMBkwRsceEkFdyP97e-fNqA8Pn_9G2w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default', '_blank')">
                 💬 加入 LuvBar 練愛指南
             </button>
             
-            <button class="btn btn-rouge" onclick="window.open('https://lcf.oen.tw/', '_blank')">
+            <button class="btn btn-yellow" onclick="window.open('https://lcf.oen.tw/', '_blank')">
                 🤓 最新情緒力課程
             </button>
             
@@ -428,6 +458,11 @@
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('progress').style.width = `100%`;
+        
+        // 隱藏全域燈籠，只顯示卡片內的
+        document.getElementById('global-lantern-l').style.display = 'none';
+        document.getElementById('global-lantern-r').style.display = 'none';
+        
         createConfetti();
 
         // 延遲後生成圖片 (1.5秒確保動畫與字型載入)
@@ -473,6 +508,7 @@
         const blob = dataURLtoBlob(finalImageDataUrl);
         const file = new File([blob], "love_league_result.png", { type: "image/png" });
 
+        // 優先嘗試原生分享 (Web Share API Level 2)
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             navigator.share({
                 files: [file],
@@ -482,6 +518,7 @@
                 console.log('分享取消', error);
             });
         } else {
+            // 降級處理：直接下載
             const link = document.createElement('a');
             link.download = '愛盟_過年生存角色.png';
             link.href = finalImageDataUrl;
