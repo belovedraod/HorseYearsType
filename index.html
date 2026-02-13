@@ -91,7 +91,7 @@
             flex-direction: column;
         }
 
-        /* 燈籠樣式 - 共用 */
+        /* 燈籠樣式 */
         .lantern {
             position: absolute;
             top: -10px;
@@ -137,7 +137,7 @@
             gap: 8px;
         }
         .btn:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.7; cursor: wait; }
+        .btn:disabled { opacity: 0.7; cursor: wait; filter: grayscale(50%); }
 
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
         .btn-gold { background: linear-gradient(to bottom, #ffca28, #ffb300); color: #4e342e; border: 2px solid #ffd54f; box-shadow: 0 4px 0 #bfa36f; }
@@ -396,7 +396,6 @@
     let scores = { PR: 0, ATM: 0, Chef: 0, Ghost: 0 };
     let currentQ = 0;
     let finalImageDataUrl = null;
-    let isGenerating = false;
 
     function startQuiz() {
         document.getElementById('home-screen').classList.add('hidden');
@@ -467,8 +466,7 @@
         
         createConfetti();
 
-        // **關鍵修改**：不再自動生成，改為按鈕點擊時觸發，避免競爭條件或未載入完成
-        // 保留DOM供使用者瀏覽，圖片生成由使用者觸發
+        // 不再自動生成，改為按鈕點擊時觸發
     }
 
     // 獨立生成圖片函數，返回 Promise
@@ -489,6 +487,9 @@
                         item.style.transform = 'none';
                         item.style.animation = 'none';
                     });
+                    // 暫停燈籠動畫
+                    const lanterns = clonedTarget.querySelectorAll('.lantern');
+                    lanterns.forEach(l => l.style.animation = 'none');
                 }
             }).then(canvas => {
                 const dataUrl = canvas.toDataURL("image/png");
@@ -539,7 +540,8 @@
             }
         } catch (error) {
             console.error("分享失敗:", error);
-            alert("分享發生錯誤，請嘗試直接截圖保存。");
+            // 靜默失敗或提示手動保存
+            // alert("分享發生錯誤，請長按圖片保存。");
         } finally {
             btn.innerText = originalText;
             btn.disabled = false;
