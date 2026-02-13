@@ -142,14 +142,15 @@
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
         .btn-gold { background: linear-gradient(to bottom, #ffca28, #ffb300); color: #4e342e; border: 2px solid #ffd54f; box-shadow: 0 4px 0 #bfa36f; }
         
-        /* 綠色分享按鈕 */
+        /* 綠色分享按鈕 (LINE) */
         .btn-green {
-            background: linear-gradient(to bottom, #43a047, #2e7d32); /* 鮮明綠到深綠 */
-            border: 2px solid #a5d6a7;
-            box-shadow: 0 4px 0 #1b5e20;
+            background: linear-gradient(to bottom, #06c755, #00b900);
+            border: 2px solid #5ac463;
+            box-shadow: 0 4px 0 #008c00;
+            color: #fff;
         }
 
-        /* 桃花粉 - 戀愛指南 */
+        /* 桃花粉 */
         .btn-pink { 
             background: linear-gradient(to bottom, #f06292, #ec407a); 
             border: 2px solid #f8bbd0; 
@@ -157,12 +158,12 @@
             color: #fff;
         }
 
-        /* 活力黃 - 課程 */
+        /* 活力黃 */
         .btn-yellow { 
             background: linear-gradient(to bottom, #fff176, #fbc02d); 
             border: 2px solid #fff9c4; 
             box-shadow: 0 4px 0 #f57f17; 
-            color: #4e342e; /* 深褐字 */
+            color: #4e342e;
         }
 
         .btn-outline { background: transparent; border: 1px solid rgba(0,0,0,0.1); color: #888; box-shadow: none; margin-top: 20px; font-size: 0.9rem; }
@@ -255,6 +256,7 @@
             position: relative;
             width: 100%;
             display: none; 
+            margin-top: 20px;
         }
         
         #generated-image {
@@ -262,6 +264,7 @@
             height: auto;
             display: block;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-radius: 10px;
         }
 
     </style>
@@ -352,18 +355,23 @@
 
         <!-- 圖片顯示區 (初始隱藏) -->
         <div id="generated-image-wrap">
+            <p style="text-align:center; color:#555; margin-bottom:5px;">👇 長按圖片即可儲存 👇</p>
             <img id="generated-image" alt="測驗結果圖片" />
         </div>
 
         <div class="footer-cta reveal-item reveal-delay-4">
             <p style="margin-bottom: 15px; font-size: 1.1rem; font-weight: bold;">覺得準嗎？分享給朋友一起測驗！</p>
             
-            <button class="btn btn-green" id="share-btn" onclick="shareOrDownload()">
-                📸 直接分享給親友
+            <button class="btn btn-gold" id="download-btn" onclick="downloadImage()">
+                📥 下載結果圖卡 (存圖轉傳)
+            </button>
+            
+            <button class="btn btn-green" onclick="shareLine()">
+                💬 分享測驗連結給朋友
             </button>
             
             <button class="btn btn-pink" onclick="window.open('https://line.me/ti/g2/QdcpjzvhMBkwRsceEkFdyP97e-fNqA8Pn_9G2w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default', '_blank')">
-                💬 加入 LuvBar 練愛指南
+                💌 加入 LuvBar 戀愛指南
             </button>
             
             <button class="btn btn-yellow" onclick="window.open('https://lcf.oen.tw/', '_blank')">
@@ -395,7 +403,9 @@
 
     let scores = { PR: 0, ATM: 0, Chef: 0, Ghost: 0 };
     let currentQ = 0;
-    let finalImageDataUrl = null;
+    
+    // 初始化分享連結
+    const currentUrl = window.location.href;
 
     function startQuiz() {
         document.getElementById('home-screen').classList.add('hidden');
@@ -460,101 +470,75 @@
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('progress').style.width = `100%`;
         
-        // 隱藏全域燈籠，只顯示卡片內的
         document.getElementById('global-lantern-l').style.display = 'none';
         document.getElementById('global-lantern-r').style.display = 'none';
         
         createConfetti();
-
-        // 不再自動生成，改為按鈕點擊時觸發
     }
 
-    // 獨立生成圖片函數，返回 Promise
-    function generateImagePromise() {
-        return new Promise((resolve, reject) => {
-            const targetElement = document.getElementById('capture-target');
-            
-            html2canvas(targetElement, {
-                backgroundColor: "#fffbf0",
-                scale: 2, 
-                useCORS: true,
-                onclone: (clonedDoc) => {
-                    const clonedTarget = clonedDoc.getElementById('capture-target');
-                    // 強制所有動畫元素為最終狀態
-                    const items = clonedTarget.querySelectorAll('.reveal-item');
-                    items.forEach(item => {
-                        item.style.opacity = '1';
-                        item.style.transform = 'none';
-                        item.style.animation = 'none';
-                    });
-                    // 暫停燈籠動畫
-                    const lanterns = clonedTarget.querySelectorAll('.lantern');
-                    lanterns.forEach(l => l.style.animation = 'none');
-                }
-            }).then(canvas => {
-                const dataUrl = canvas.toDataURL("image/png");
-                
-                // 更新圖片顯示區 (供長按)
-                const img = document.getElementById('generated-image');
-                img.src = dataUrl;
-                document.getElementById('dom-result-area').style.display = 'none';
-                document.getElementById('generated-image-wrap').style.display = 'block';
-                
-                resolve(dataUrl);
-            }).catch(err => reject(err));
-        });
-    }
-
-    async function shareOrDownload() {
-        const btn = document.getElementById('share-btn');
+    // 核心功能：生成圖片並下載
+    function downloadImage() {
+        const btn = document.getElementById('download-btn');
         const originalText = btn.innerText;
-        btn.innerText = "⟳ 製作圖片中..."; 
+        btn.innerText = "⟳ 圖片生成中...";
         btn.disabled = true;
 
-        try {
-            // 1. 確保圖片已生成
-            let dataUrl = finalImageDataUrl;
-            if (!dataUrl) {
-                dataUrl = await generateImagePromise();
-                finalImageDataUrl = dataUrl;
-            }
-
-            // 2. 轉換為 Blob
-            const blob = await (await fetch(dataUrl)).blob();
-            const file = new File([blob], "love_league_result.png", { type: "image/png" });
-
-            // 3. 嘗試原生分享
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: '過年生存型人格測試',
-                    text: '快來看看我在家族中是什麼角色！',
+        const targetElement = document.getElementById('capture-target');
+        
+        html2canvas(targetElement, {
+            backgroundColor: "#fffbf0",
+            scale: 2, 
+            useCORS: true,
+            onclone: (clonedDoc) => {
+                const clonedTarget = clonedDoc.getElementById('capture-target');
+                const items = clonedTarget.querySelectorAll('.reveal-item');
+                items.forEach(item => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'none';
+                    item.style.animation = 'none';
                 });
-            } else {
-                // 4. 降級處理：下載
+                const lanterns = clonedTarget.querySelectorAll('.lantern');
+                lanterns.forEach(l => l.style.animation = 'none');
+            }
+        }).then(canvas => {
+            const dataUrl = canvas.toDataURL("image/png");
+            
+            // 1. 顯示在畫面上供長按 (iOS 友善)
+            const img = document.getElementById('generated-image');
+            img.src = dataUrl;
+            document.getElementById('dom-result-area').style.display = 'none';
+            document.getElementById('generated-image-wrap').style.display = 'block';
+
+            // 2. 嘗試觸發下載 (Android/Desktop)
+            try {
                 const link = document.createElement('a');
                 link.download = '愛盟_過年生存角色.png';
                 link.href = dataUrl;
                 link.click();
-                alert("圖片已下載！請至相簿查看並分享。");
+            } catch (e) {
+                console.log('自動下載被攔截，切換為長按模式');
             }
-        } catch (error) {
-            console.error("分享失敗:", error);
-            // 靜默失敗或提示手動保存
-            // alert("分享發生錯誤，請長按圖片保存。");
-        } finally {
+
+            btn.innerText = "✅ 圖片已生成 (長按可儲存)";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }, 3000);
+
+        }).catch(err => {
+            console.error(err);
+            alert("圖片生成失敗，請稍後再試！");
             btn.innerText = originalText;
             btn.disabled = false;
-        }
+        });
     }
 
-    function dataURLtoBlob(dataurl) {
-        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-        while(n--){
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new Blob([u8arr], {type:mime});
+    // 核心功能：分享連結到 LINE
+    function shareLine() {
+        const shareText = "我在【過年生存人格測試】中測出了我的角色！快來測測你是什麼？";
+        // 使用 LINE 官方分享 URL Scheme
+        const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(currentUrl)}`;
+        window.open(lineUrl, '_blank');
     }
 
 </script>
