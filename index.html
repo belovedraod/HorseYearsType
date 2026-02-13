@@ -91,7 +91,7 @@
             flex-direction: column;
         }
 
-        /* 燈籠樣式 (全域) */
+        /* 燈籠樣式 */
         .lantern {
             position: absolute;
             top: -10px;
@@ -152,7 +152,7 @@
 
         /* 桃花粉 */
         .btn-pink { 
-            background: linear-gradient(to bottom, #f48fb1, #ec407a); 
+            background: linear-gradient(to bottom, #f06292, #ec407a); 
             border: 2px solid #f8bbd0; 
             box-shadow: 0 4px 0 #880e4f; 
             color: #fff;
@@ -265,6 +265,7 @@
             position: relative;
             width: 100%;
             display: none; 
+            margin-top: 20px;
         }
         
         #generated-image {
@@ -272,6 +273,7 @@
             height: auto;
             display: block;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-radius: 10px;
         }
 
     </style>
@@ -363,11 +365,17 @@
             </div>
         </div>
 
+        <!-- 圖片顯示區 (初始隱藏，生成後顯示) -->
+        <div id="generated-image-wrap">
+            <p style="text-align:center; color:#555; margin-bottom:5px; font-weight:bold;">👇 圖片已生成，長按可儲存 👇</p>
+            <img id="generated-image" alt="測驗結果圖片" />
+        </div>
+
         <div class="footer-cta reveal-item reveal-delay-4">
             <p style="margin-bottom: 15px; font-size: 1.1rem; font-weight: bold;">覺得準嗎？分享給朋友一起測驗！</p>
             
             <button class="btn btn-green" id="share-btn" onclick="shareOrDownload()">
-                📸 直接分享給親友
+                📸 一鍵分享測試結果
             </button>
             
             <button class="btn btn-pink" onclick="window.open('https://line.me/ti/g2/QdcpjzvhMBkwRsceEkFdyP97e-fNqA8Pn_9G2w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default', '_blank')">
@@ -403,9 +411,7 @@
 
     let scores = { PR: 0, ATM: 0, Chef: 0, Ghost: 0 };
     let currentQ = 0;
-    
-    // 初始化分享連結
-    const currentUrl = window.location.href;
+    let finalImageDataUrl = null;
 
     function startQuiz() {
         document.getElementById('home-screen').classList.add('hidden');
@@ -475,6 +481,7 @@
         document.getElementById('global-lantern-r').style.display = 'none';
         
         createConfetti();
+        // 移除自動生成，改為按鈕觸發
     }
 
     // 獨立生成圖片函數，返回 Promise
@@ -482,25 +489,27 @@
         return new Promise((resolve, reject) => {
             const targetElement = document.getElementById('capture-wrapper');
             
+            // 確保元素可見 (雖然它本來就可見)
+            targetElement.style.display = 'block';
+
             html2canvas(targetElement, {
                 backgroundColor: "#fffbf0",
                 scale: 2, 
                 useCORS: true,
                 onclone: (clonedDoc) => {
                     const clonedTarget = clonedDoc.getElementById('capture-wrapper');
-                    // 強制所有動畫元素為最終狀態
                     const items = clonedTarget.querySelectorAll('.reveal-item');
                     items.forEach(item => {
                         item.style.opacity = '1';
                         item.style.transform = 'none';
                         item.style.animation = 'none';
                     });
-                    // 暫停燈籠動畫，確保位置正確
                     const lanterns = clonedTarget.querySelectorAll('.lantern');
                     lanterns.forEach(l => l.style.animation = 'none');
                 }
             }).then(canvas => {
                 const dataUrl = canvas.toDataURL("image/png");
+                finalImageDataUrl = dataUrl; // Cache it
                 resolve(dataUrl);
             }).catch(err => reject(err));
         });
@@ -514,13 +523,25 @@
 
         try {
             // 1. 生成圖片
-            const dataUrl = await generateImagePromise();
+            let dataUrl = finalImageDataUrl;
+            if (!dataUrl) {
+                dataUrl = await generateImagePromise();
+            }
 
-            // 2. 轉換為 Blob
+            // 2. 顯示圖片供長按 (特別是 LINE 瀏覽器無法下載時)
+            const imgDisplay = document.getElementById('generated-image');
+            const imgWrap = document.getElementById('generated-image-wrap');
+            imgDisplay.src = dataUrl;
+            document.getElementById('dom-result-area').style.display = 'none';
+            imgWrap.style.display = 'block';
+            
+            // 滾動到圖片位置
+            imgWrap.scrollIntoView({behavior: "smooth"});
+
+            // 3. 嘗試原生分享
             const blob = await (await fetch(dataUrl)).blob();
             const file = new File([blob], "love_league_result.png", { type: "image/png" });
 
-            // 3. 嘗試原生分享
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
                     await navigator.share({
@@ -528,32 +549,29 @@
                         title: '過年生存型人格測試',
                         text: '快來看看我在家族中是什麼角色！',
                     });
-                    // 分享成功，結束
-                    return;
                 } catch (shareError) {
-                    // 如果是取消，直接結束
-                    if (shareError.name === 'AbortError' || shareError.message.toLowerCase().includes('cancel')) {
-                        console.log('使用者已取消分享');
-                        return;
+                    if (shareError.name !== 'AbortError') {
+                        console.warn("分享失敗，轉為提示下載", shareError);
+                        // 如果分享失敗但不是取消，提示長按
+                        alert("無法直接開啟分享選單，請長按上方圖片儲存後分享！");
                     }
-                    // 其他分享錯誤，印出警告並繼續執行下載邏輯
-                    console.warn("分享遭遇問題，嘗試轉為下載:", shareError);
+                }
+            } else {
+                // 不支援分享 API，嘗試下載
+                try {
+                    const link = document.createElement('a');
+                    link.download = '愛盟_過年生存角色.png';
+                    link.href = dataUrl;
+                    link.click();
+                    alert("圖片已下載！若未下載，請長按上方圖片儲存。");
+                } catch (e) {
+                    alert("請長按上方圖片儲存後分享！");
                 }
             }
 
-            // 4. 降級處理：下載 (如果分享不支援或失敗)
-            const link = document.createElement('a');
-            link.download = '愛盟_過年生存角色.png';
-            link.href = dataUrl;
-            link.click();
-            alert("圖片已下載！請至相簿查看並分享。");
-
         } catch (error) {
-            console.error("處理過程發生錯誤:", error);
-            // 只有在非取消的情況下才顯示錯誤提示
-            if (error.name !== 'AbortError' && !error.message.toLowerCase().includes('cancel')) {
-                 alert("發生錯誤，請嘗試手動截圖保存。");
-            }
+            console.error("處理錯誤:", error);
+            alert("發生錯誤，請長按圖片手動儲存。");
         } finally {
             btn.innerText = originalText;
             btn.disabled = false;
