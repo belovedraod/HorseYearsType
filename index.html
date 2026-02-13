@@ -137,6 +137,7 @@
             gap: 8px;
         }
         .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.7; cursor: wait; }
 
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
         .btn-gold { background: linear-gradient(to bottom, #ffca28, #ffb300); color: #4e342e; border: 2px solid #ffd54f; box-shadow: 0 4px 0 #bfa36f; }
@@ -395,6 +396,7 @@
     let scores = { PR: 0, ATM: 0, Chef: 0, Ghost: 0 };
     let currentQ = 0;
     let finalImageDataUrl = null;
+    let isGenerating = false;
 
     function startQuiz() {
         document.getElementById('home-screen').classList.add('hidden');
@@ -465,65 +467,82 @@
         
         createConfetti();
 
-        // 延遲後生成圖片 (1.5秒確保動畫與字型載入)
-        setTimeout(() => {
-            generateImageForMobile();
-        }, 1500); 
+        // **關鍵修改**：不再自動生成，改為按鈕點擊時觸發，避免競爭條件或未載入完成
+        // 保留DOM供使用者瀏覽，圖片生成由使用者觸發
     }
 
-    function generateImageForMobile() {
-        const targetElement = document.getElementById('capture-target');
-        
-        // 使用 onclone 確保截圖時元素是完全可見的，不受動畫影響
-        html2canvas(targetElement, {
-            backgroundColor: "#fffbf0",
-            scale: 2, 
-            useCORS: true,
-            onclone: (clonedDoc) => {
-                const clonedTarget = clonedDoc.getElementById('capture-target');
-                // 強制所有動畫元素為最終狀態
-                const items = clonedTarget.querySelectorAll('.reveal-item');
-                items.forEach(item => {
-                    item.style.opacity = '1';
-                    item.style.transform = 'none';
-                    item.style.animation = 'none';
-                });
-            }
-        }).then(canvas => {
-            finalImageDataUrl = canvas.toDataURL("image/png");
-            const img = document.getElementById('generated-image');
-            img.src = finalImageDataUrl;
+    // 獨立生成圖片函數，返回 Promise
+    function generateImagePromise() {
+        return new Promise((resolve, reject) => {
+            const targetElement = document.getElementById('capture-target');
             
-            document.getElementById('dom-result-area').style.display = 'none';
-            document.getElementById('generated-image-wrap').style.display = 'block';
+            html2canvas(targetElement, {
+                backgroundColor: "#fffbf0",
+                scale: 2, 
+                useCORS: true,
+                onclone: (clonedDoc) => {
+                    const clonedTarget = clonedDoc.getElementById('capture-target');
+                    // 強制所有動畫元素為最終狀態
+                    const items = clonedTarget.querySelectorAll('.reveal-item');
+                    items.forEach(item => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'none';
+                        item.style.animation = 'none';
+                    });
+                }
+            }).then(canvas => {
+                const dataUrl = canvas.toDataURL("image/png");
+                
+                // 更新圖片顯示區 (供長按)
+                const img = document.getElementById('generated-image');
+                img.src = dataUrl;
+                document.getElementById('dom-result-area').style.display = 'none';
+                document.getElementById('generated-image-wrap').style.display = 'block';
+                
+                resolve(dataUrl);
+            }).catch(err => reject(err));
         });
     }
 
-    function shareOrDownload() {
-        if (!finalImageDataUrl) {
-            alert("圖片生成中，請稍後再試...");
-            return;
-        }
+    async function shareOrDownload() {
+        const btn = document.getElementById('share-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "⟳ 製作圖片中..."; 
+        btn.disabled = true;
 
-        const blob = dataURLtoBlob(finalImageDataUrl);
-        const file = new File([blob], "love_league_result.png", { type: "image/png" });
+        try {
+            // 1. 確保圖片已生成
+            let dataUrl = finalImageDataUrl;
+            if (!dataUrl) {
+                dataUrl = await generateImagePromise();
+                finalImageDataUrl = dataUrl;
+            }
 
-        // 優先嘗試原生分享 (Web Share API Level 2)
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({
-                files: [file],
-                title: '過年生存型人格測試',
-                text: '快來看看我在家族中是什麼角色！',
-            }).catch((error) => {
-                console.log('分享取消', error);
-            });
-        } else {
-            // 降級處理：直接下載
-            const link = document.createElement('a');
-            link.download = '愛盟_過年生存角色.png';
-            link.href = finalImageDataUrl;
-            link.click();
-            alert("圖片已下載！請至相簿查看並分享。");
+            // 2. 轉換為 Blob
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], "love_league_result.png", { type: "image/png" });
+
+            // 3. 嘗試原生分享
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: '過年生存型人格測試',
+                    text: '快來看看我在家族中是什麼角色！',
+                });
+            } else {
+                // 4. 降級處理：下載
+                const link = document.createElement('a');
+                link.download = '愛盟_過年生存角色.png';
+                link.href = dataUrl;
+                link.click();
+                alert("圖片已下載！請至相簿查看並分享。");
+            }
+        } catch (error) {
+            console.error("分享失敗:", error);
+            alert("分享發生錯誤，請嘗試直接截圖保存。");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
     }
 
