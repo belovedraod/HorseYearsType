@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>【過年生存人格】你在家族中是什麼角色？</title>
+    <!-- 引入字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-    <!-- 引入 html2canvas -->
+    <!-- 引入 html2canvas (使用穩定版本) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -31,6 +32,7 @@
             padding: 0;
             font-family: 'Noto Sans TC', sans-serif;
             background-color: var(--bg-red);
+            /* 背景圖案 */
             background-image: 
                 linear-gradient(135deg, #cc0000 25%, transparent 25%),
                 linear-gradient(225deg, #cc0000 25%, transparent 25%),
@@ -55,7 +57,7 @@
             height: 150px;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 50 Q25 25 50 50 T90 50' stroke='%23ffb300' stroke-width='2' fill='none' opacity='0.3'/%3E%3C/svg%3E");
             background-size: 50px 50px;
-            pointer-events: none;
+            pointer-events: none; /* 關鍵：讓點擊穿透 */
             z-index: 0;
         }
 
@@ -66,6 +68,7 @@
             animation: fall linear infinite;
             opacity: 0;
             z-index: 99;
+            pointer-events: none; /* 關鍵：讓點擊穿透 */
         }
         @keyframes fall {
             0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
@@ -88,7 +91,7 @@
             flex-direction: column;
         }
 
-        /* 燈籠樣式 */
+        /* 燈籠 */
         .lantern {
             position: absolute;
             top: -10px;
@@ -101,6 +104,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             animation: swing 3s infinite ease-in-out;
             transform-origin: top center;
+            pointer-events: none;
         }
         .lantern::before { content: ''; position: absolute; top: -5px; left: 20px; width: 20px; height: 5px; background: var(--border-color); }
         .lantern::after { content: ''; position: absolute; bottom: -20px; left: 25px; width: 10px; height: 20px; background: var(--gold); border-radius: 0 0 5px 5px; }
@@ -132,13 +136,14 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            z-index: 50; /* 確保按鈕層級夠高 */
         }
         .btn:active { transform: scale(0.98); }
         .btn:disabled { opacity: 0.7; cursor: wait; filter: grayscale(50%); }
 
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
         
-        /* 綠色分享按鈕 (改為生成圖片) */
+        /* 綠色按鈕 (生成卡片) */
         .btn-green {
             background: linear-gradient(to bottom, #43a047, #2e7d32);
             border: 2px solid #a5d6a7;
@@ -169,7 +174,7 @@
         .fade-in { animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Home & Quiz Layout */
+        /* Layout */
         #home-screen { padding: 60px 20px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: space-between; background-image: radial-gradient(circle at center, rgba(255,215,0,0.1) 0%, transparent 70%); }
         .home-content { margin-top: auto; margin-bottom: auto; width: 100%; }
         .hero-title { font-family: 'Noto Sans TC', sans-serif; font-weight: 900; font-size: 3.5rem; color: var(--primary); text-shadow: 3px 3px 0 var(--gold); line-height: 1.2; margin-bottom: 20px; transform: rotate(-2deg); }
@@ -189,7 +194,7 @@
         /* 結果頁 */
         #result-screen { padding: 0; background: var(--border-color); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         
-        /* 截圖專用容器 */
+        /* 截圖範圍與顯示區域合一 */
         #capture-wrapper {
             background-color: #fffbf0;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d32f2f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
@@ -222,9 +227,6 @@
         .reveal-delay-3 { animation-delay: 0.6s; }
         .reveal-delay-4 { animation-delay: 0.8s; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-
-        /* Snapshot 模式 */
-        .snapshot-mode .reveal-item { opacity: 1 !important; transform: none !important; animation: none !important; }
 
         .role-badge { background: var(--text); color: var(--gold); padding: 5px 15px; font-weight: 700; border-radius: 4px; display: inline-block; margin-bottom: 10px; font-size: 0.9rem; letter-spacing: 1px; border: 1px solid var(--gold); }
         .role-title { font-family: 'Noto Sans TC', sans-serif; font-weight: 900; font-size: 3.5rem; color: var(--primary); margin: 5px 0; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
@@ -397,7 +399,6 @@
         <div class="footer-cta reveal-item reveal-delay-4">
             <p style="margin-bottom: 15px; font-size: 1.1rem; font-weight: bold;">覺得準嗎？分享給朋友一起測驗！</p>
             
-            <!-- 綠色分享按鈕 -->
             <button class="btn btn-green" id="share-btn" onclick="generateAndShowImage()">
                 🎁 生成結果卡片 (長按存圖)
             </button>
@@ -499,13 +500,14 @@
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('progress').style.width = `100%`;
         
+        // 隱藏全域燈籠，只顯示卡片內的
         document.getElementById('global-lantern-l').style.display = 'none';
         document.getElementById('global-lantern-r').style.display = 'none';
         
         createConfetti();
     }
 
-    // 生成並顯示圖片（最可靠的跨平台方案）
+    // 生成並顯示圖片到 Modal
     function generateAndShowImage() {
         const btn = document.getElementById('share-btn');
         const originalText = btn.innerText;
@@ -514,17 +516,23 @@
 
         const targetElement = document.getElementById('capture-wrapper');
         
+        // 強制確保截圖區塊是可見的
+        targetElement.style.display = 'block';
+
         html2canvas(targetElement, {
             backgroundColor: "#fffbf0",
             scale: 2, 
             useCORS: true,
+            scrollX: 0,
+            scrollY: 0,
             onclone: (clonedDoc) => {
-                // 截圖時暫停燈籠動畫，避免錯位
-                const lanterns = clonedDoc.querySelectorAll('.lantern');
+                const clonedTarget = clonedDoc.getElementById('capture-wrapper');
+                // 暫停燈籠動畫
+                const lanterns = clonedTarget.querySelectorAll('.lantern');
                 lanterns.forEach(l => l.style.animation = 'none');
                 
                 // 強制顯示所有動畫元素
-                const items = clonedDoc.querySelectorAll('.reveal-item');
+                const items = clonedTarget.querySelectorAll('.reveal-item');
                 items.forEach(item => {
                     item.style.opacity = '1';
                     item.style.transform = 'none';
