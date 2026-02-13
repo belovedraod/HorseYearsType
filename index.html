@@ -16,9 +16,6 @@
             --dark-gold: #bfa36f;
             --jade-green: #00695c;
             --pink: #f48fb1;
-            --pink-dark: #c2185b;
-            --yellow: #fff176;
-            --yellow-dark: #fbc02d;
             --text: #4a0e0e;
             --border-color: #590d0d;
         }
@@ -140,9 +137,8 @@
         .btn:disabled { opacity: 0.7; cursor: wait; filter: grayscale(50%); }
 
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
-        .btn-gold { background: linear-gradient(to bottom, #ffca28, #ffb300); color: #4e342e; border: 2px solid #ffd54f; box-shadow: 0 4px 0 #bfa36f; }
         
-        /* 綠色分享按鈕 */
+        /* 綠色分享按鈕 (改為生成圖片) */
         .btn-green {
             background: linear-gradient(to bottom, #43a047, #2e7d32);
             border: 2px solid #a5d6a7;
@@ -164,7 +160,7 @@
             background: linear-gradient(to bottom, #fff176, #fbc02d); 
             border: 2px solid #fff9c4; 
             box-shadow: 0 4px 0 #f57f17; 
-            color: #4e342e; /* 深褐字 */
+            color: #4e342e;
         }
 
         .btn-outline { background: transparent; border: 1px solid rgba(0,0,0,0.1); color: #888; box-shadow: none; margin-top: 20px; font-size: 0.9rem; }
@@ -193,14 +189,14 @@
         /* 結果頁 */
         #result-screen { padding: 0; background: var(--border-color); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         
-        /* 截圖專用容器：包含燈籠與底部文字 */
+        /* 截圖專用容器 */
         #capture-wrapper {
             background-color: #fffbf0;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d32f2f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             width: 100%;
             position: relative;
-            padding-top: 60px; /* 給燈籠的空間 */
-            padding-bottom: 20px; /* 底部空間 */
+            padding-top: 60px; /* 給燈籠 */
+            padding-bottom: 20px; /* 給版權 */
         }
 
         .result-card {
@@ -211,10 +207,7 @@
             background: transparent;
         }
 
-        /* 截圖內的燈籠，位置要固定 */
-        #capture-wrapper .lantern {
-            top: 20px; 
-        }
+        #capture-wrapper .lantern { top: 20px; }
 
         .corner-decor { position: absolute; width: 50px; height: 50px; pointer-events: none; }
         .tl { top: 15px; left: 15px; border-top: 4px solid var(--primary); border-left: 4px solid var(--primary); border-radius: 10px 0 0 0; }
@@ -255,26 +248,56 @@
         .good-rel .rel-role { color: var(--jade-green); }
         .bad-rel .rel-role { color: var(--primary); }
 
-        .footer-cta { width: 100%; padding: 25px 20px 0; background: #fffbf0; color: #333; text-align: center; border-top: 1px dashed var(--gold); }
+        .footer-cta { width: 100%; padding: 25px 20px 50px; background: #fffbf0; color: #333; text-align: center; border-top: 1px dashed var(--gold); }
         .global-footer { text-align: center; font-size: 0.75rem; color: rgba(0,0,0,0.4); margin-top: auto; padding: 20px; line-height: 1.5; width: 100%; }
         .footer-cta + .global-footer { background: #fffbf0; color: #888; }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-        #generated-image-wrap {
-            position: relative;
-            width: 100%;
-            display: none; 
-            margin-top: 20px;
+        /* Modal 樣式 */
+        #image-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
         
+        #image-modal.show { display: flex; animation: fadeIn 0.3s ease; }
+
         #generated-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 90%;
+            max-height: 80vh;
             border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            border: 2px solid var(--gold);
         }
+
+        .modal-tip {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        .modal-close {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 10px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+
+        @keyframes pulse { 0% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.8; transform: scale(1); } }
 
     </style>
 </head>
@@ -283,8 +306,15 @@
 <div class="cloud-bg"></div>
 <div id="confetti-container"></div>
 
+<!-- 圖片彈出視窗 -->
+<div id="image-modal">
+    <div class="modal-tip">👆 請長按圖片，選擇分享或儲存 👆</div>
+    <img id="generated-image" alt="測驗結果" />
+    <button class="modal-close" onclick="closeModal()">關閉視窗</button>
+</div>
+
 <div id="app">
-    <!-- 全域燈籠 (首頁與測驗頁顯示，結果頁隱藏) -->
+    <!-- 全域燈籠 -->
     <div class="lantern left" id="global-lantern-l"></div>
     <div class="lantern right" id="global-lantern-r"></div>
 
@@ -323,9 +353,9 @@
     <!-- 3. 結果頁 -->
     <div id="result-screen" class="hidden">
         
-        <!-- 截圖範圍與顯示區域合一 -->
+        <!-- 截圖範圍 (隱藏在畫面外，但可被渲染) -->
         <div id="capture-wrapper">
-            <!-- 內嵌燈籠 (截圖用) -->
+            <!-- 內嵌燈籠 -->
             <div class="lantern left"></div>
             <div class="lantern right"></div>
 
@@ -357,7 +387,6 @@
                         <div class="rel-item bad-rel"><span class="rel-label">💀 天生剋星</span><span class="rel-role" id="res-worst">公關經理</span></div>
                     </div>
                     
-                    <!-- 頁尾版權 (截圖的一部分) -->
                     <div style="text-align: center; font-size: 0.9rem; color: #888; margin-top: 15px; line-height: 1.5; font-weight: bold; padding-bottom: 10px;">
                         © 2026 愛盟家庭文教基金會<br>為愛學習持續練習，是一件幸福的事
                     </div>
@@ -365,21 +394,16 @@
             </div>
         </div>
 
-        <!-- 圖片顯示區 (初始隱藏，生成後顯示) -->
-        <div id="generated-image-wrap">
-            <p style="text-align:center; color:#555; margin-bottom:5px; font-weight:bold;">👇 圖片已生成，長按可儲存 👇</p>
-            <img id="generated-image" alt="測驗結果圖片" />
-        </div>
-
         <div class="footer-cta reveal-item reveal-delay-4">
             <p style="margin-bottom: 15px; font-size: 1.1rem; font-weight: bold;">覺得準嗎？分享給朋友一起測驗！</p>
             
-            <button class="btn btn-green" id="share-btn" onclick="shareOrDownload()">
-                📸 一鍵分享測試結果
+            <!-- 綠色分享按鈕 -->
+            <button class="btn btn-green" id="share-btn" onclick="generateAndShowImage()">
+                🎁 生成結果卡片 (長按存圖)
             </button>
             
             <button class="btn btn-pink" onclick="window.open('https://line.me/ti/g2/QdcpjzvhMBkwRsceEkFdyP97e-fNqA8Pn_9G2w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default', '_blank')">
-                💌 加入 LuvBar 練愛指南
+                💌 加入 LuvBar 戀愛指南
             </button>
             
             <button class="btn btn-yellow" onclick="window.open('https://lcf.oen.tw/', '_blank')">
@@ -411,8 +435,7 @@
 
     let scores = { PR: 0, ATM: 0, Chef: 0, Ghost: 0 };
     let currentQ = 0;
-    let finalImageDataUrl = null;
-
+    
     function startQuiz() {
         document.getElementById('home-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
@@ -476,106 +499,61 @@
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('progress').style.width = `100%`;
         
-        // 隱藏全域燈籠，只顯示卡片內的
         document.getElementById('global-lantern-l').style.display = 'none';
         document.getElementById('global-lantern-r').style.display = 'none';
         
         createConfetti();
-        // 移除自動生成，改為按鈕觸發
     }
 
-    // 獨立生成圖片函數，返回 Promise
-    function generateImagePromise() {
-        return new Promise((resolve, reject) => {
-            const targetElement = document.getElementById('capture-wrapper');
-            
-            // 確保元素可見 (雖然它本來就可見)
-            targetElement.style.display = 'block';
+    // 生成並顯示圖片（最可靠的跨平台方案）
+    function generateAndShowImage() {
+        const btn = document.getElementById('share-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "⟳ 製作卡片中...";
+        btn.disabled = true;
 
-            html2canvas(targetElement, {
-                backgroundColor: "#fffbf0",
-                scale: 2, 
-                useCORS: true,
-                onclone: (clonedDoc) => {
-                    const clonedTarget = clonedDoc.getElementById('capture-wrapper');
-                    const items = clonedTarget.querySelectorAll('.reveal-item');
-                    items.forEach(item => {
-                        item.style.opacity = '1';
-                        item.style.transform = 'none';
-                        item.style.animation = 'none';
-                    });
-                    const lanterns = clonedTarget.querySelectorAll('.lantern');
-                    lanterns.forEach(l => l.style.animation = 'none');
-                }
-            }).then(canvas => {
-                const dataUrl = canvas.toDataURL("image/png");
-                finalImageDataUrl = dataUrl; // Cache it
-                resolve(dataUrl);
-            }).catch(err => reject(err));
+        const targetElement = document.getElementById('capture-wrapper');
+        
+        html2canvas(targetElement, {
+            backgroundColor: "#fffbf0",
+            scale: 2, 
+            useCORS: true,
+            onclone: (clonedDoc) => {
+                // 截圖時暫停燈籠動畫，避免錯位
+                const lanterns = clonedDoc.querySelectorAll('.lantern');
+                lanterns.forEach(l => l.style.animation = 'none');
+                
+                // 強制顯示所有動畫元素
+                const items = clonedDoc.querySelectorAll('.reveal-item');
+                items.forEach(item => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'none';
+                    item.style.animation = 'none';
+                });
+            }
+        }).then(canvas => {
+            const dataUrl = canvas.toDataURL("image/png");
+            
+            // 設置圖片到 Modal
+            document.getElementById('generated-image').src = dataUrl;
+            
+            // 顯示 Modal
+            document.getElementById('image-modal').classList.add('show');
+            
+            // 恢復按鈕
+            btn.innerText = originalText;
+            btn.disabled = false;
+
+        }).catch(err => {
+            console.error(err);
+            alert("圖片製作失敗，請重新整理試試！");
+            btn.innerText = originalText;
+            btn.disabled = false;
         });
     }
 
-    async function shareOrDownload() {
-        const btn = document.getElementById('share-btn');
-        const originalText = btn.innerText;
-        btn.innerText = "⟳ 製作賀卡中..."; 
-        btn.disabled = true;
-
-        try {
-            // 1. 生成圖片
-            let dataUrl = finalImageDataUrl;
-            if (!dataUrl) {
-                dataUrl = await generateImagePromise();
-            }
-
-            // 2. 顯示圖片供長按 (特別是 LINE 瀏覽器無法下載時)
-            const imgDisplay = document.getElementById('generated-image');
-            const imgWrap = document.getElementById('generated-image-wrap');
-            imgDisplay.src = dataUrl;
-            document.getElementById('dom-result-area').style.display = 'none';
-            imgWrap.style.display = 'block';
-            
-            // 滾動到圖片位置
-            imgWrap.scrollIntoView({behavior: "smooth"});
-
-            // 3. 嘗試原生分享
-            const blob = await (await fetch(dataUrl)).blob();
-            const file = new File([blob], "love_league_result.png", { type: "image/png" });
-
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: '過年生存型人格測試',
-                        text: '快來看看我在家族中是什麼角色！',
-                    });
-                } catch (shareError) {
-                    if (shareError.name !== 'AbortError') {
-                        console.warn("分享失敗，轉為提示下載", shareError);
-                        // 如果分享失敗但不是取消，提示長按
-                        alert("無法直接開啟分享選單，請長按上方圖片儲存後分享！");
-                    }
-                }
-            } else {
-                // 不支援分享 API，嘗試下載
-                try {
-                    const link = document.createElement('a');
-                    link.download = '愛盟_過年生存角色.png';
-                    link.href = dataUrl;
-                    link.click();
-                    alert("圖片已下載！若未下載，請長按上方圖片儲存。");
-                } catch (e) {
-                    alert("請長按上方圖片儲存後分享！");
-                }
-            }
-
-        } catch (error) {
-            console.error("處理錯誤:", error);
-            alert("發生錯誤，請長按圖片手動儲存。");
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
+    function closeModal() {
+        document.getElementById('image-modal').classList.remove('show');
     }
 
 </script>
