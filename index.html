@@ -4,25 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>【過年生存人格】你在家族中是什麼角色？</title>
+    
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HZFTHZYBVG"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HZFTHZYBVG"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-HZFTHZYBVG');
-</script>
+      gtag('config', 'G-HZFTHZYBVG');
+    </script>
+
+    <!-- Clarity tracking code -->
     <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vhv6r7kncx");
-</script>
-    <!-- 引入字體 -->
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "vhv6r7kncx");
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-    <!-- 引入 html2canvas (建議使用最新穩定版) -->
+    <!-- 引入 html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -48,7 +51,6 @@
             padding: 0;
             font-family: 'Noto Sans TC', sans-serif;
             background-color: var(--bg-red);
-            /* 背景圖案 */
             background-image: 
                 linear-gradient(135deg, #cc0000 25%, transparent 25%),
                 linear-gradient(225deg, #cc0000 25%, transparent 25%),
@@ -73,7 +75,7 @@
             height: 150px;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 50 Q25 25 50 50 T90 50' stroke='%23ffb300' stroke-width='2' fill='none' opacity='0.3'/%3E%3C/svg%3E");
             background-size: 50px 50px;
-            pointer-events: none; /* 讓點擊穿透 */
+            pointer-events: none;
             z-index: 0;
         }
 
@@ -84,7 +86,6 @@
             animation: fall linear infinite;
             opacity: 0;
             z-index: 99;
-            pointer-events: none; /* 讓點擊穿透 */
         }
         @keyframes fall {
             0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
@@ -107,7 +108,7 @@
             flex-direction: column;
         }
 
-        /* 燈籠 */
+        /* 燈籠樣式 */
         .lantern {
             position: absolute;
             top: -10px;
@@ -120,7 +121,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             animation: swing 3s infinite ease-in-out;
             transform-origin: top center;
-            pointer-events: none;
         }
         .lantern::before { content: ''; position: absolute; top: -5px; left: 20px; width: 20px; height: 5px; background: var(--border-color); }
         .lantern::after { content: ''; position: absolute; bottom: -20px; left: 25px; width: 10px; height: 20px; background: var(--gold); border-radius: 0 0 5px 5px; }
@@ -152,12 +152,12 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            z-index: 50; /* 確保按鈕在最上層 */
         }
         .btn:active { transform: scale(0.98); }
         .btn:disabled { opacity: 0.7; cursor: wait; filter: grayscale(50%); }
 
         .btn-primary { background: linear-gradient(to bottom, #e53935, #c62828); border: 2px solid var(--gold); box-shadow: 0 4px 0 #8e0000; }
+        .btn-gold { background: linear-gradient(to bottom, #ffca28, #ffb300); color: #4e342e; border: 2px solid #ffd54f; box-shadow: 0 4px 0 #bfa36f; }
         
         /* 綠色分享按鈕 */
         .btn-green {
@@ -190,7 +190,7 @@
         .fade-in { animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Layout */
+        /* Home & Quiz Layout */
         #home-screen { padding: 60px 20px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: space-between; background-image: radial-gradient(circle at center, rgba(255,215,0,0.1) 0%, transparent 70%); }
         .home-content { margin-top: auto; margin-bottom: auto; width: 100%; }
         .hero-title { font-family: 'Noto Sans TC', sans-serif; font-weight: 900; font-size: 3.5rem; color: var(--primary); text-shadow: 3px 3px 0 var(--gold); line-height: 1.2; margin-bottom: 20px; transform: rotate(-2deg); }
@@ -330,7 +330,7 @@
 
 <!-- 圖片彈出視窗 -->
 <div id="image-modal">
-    <div class="modal-tip">👇 請長按圖片，選擇分享或儲存 👇</div>
+    <div class="modal-tip">👆 請長按圖片，選擇分享或儲存 👆</div>
     <img id="generated-image" alt="測驗結果" />
     <button class="modal-close" onclick="closeModal()">關閉視窗</button>
 </div>
@@ -422,11 +422,11 @@
                 🎁 生成結果卡片 (長按存圖)
             </button>
             
-            <button class="btn btn-pink" onclick="window.open('https://line.me/ti/g2/QdcpjzvhMBkwRsceEkFdyP97e-fNqA8Pn_9G2w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default', '_blank')">
+            <button class="btn btn-pink" onclick="trackClick('luvbar'); window.open('https://line.me/ti/g2/QdcpjzvhMBkwRsceEkFdyP97e-fNqA8Pn_9G2w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default', '_blank')">
                 💌 加入 LuvBar 戀愛指南
             </button>
             
-            <button class="btn btn-yellow" onclick="window.open('https://lcf.oen.tw/', '_blank')">
+            <button class="btn btn-yellow" onclick="trackClick('course'); window.open('https://lcf.oen.tw/', '_blank')">
                 🤓 最新情緒力課程
             </button>
             
@@ -457,6 +457,7 @@
     let currentQ = 0;
     
     function startQuiz() {
+        if (typeof gtag === 'function') { gtag('event', 'begin_quiz'); }
         document.getElementById('home-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
         loadQuestion();
@@ -507,6 +508,10 @@
         }
         const data = roles[finalRole];
 
+        if (typeof gtag === 'function') { 
+            gtag('event', 'quiz_complete', { 'character': data.title }); 
+        }
+
         document.getElementById('res-title').innerText = data.title;
         document.getElementById('res-icon').innerText = data.icon;
         document.getElementById('res-quote').innerText = data.quote;
@@ -519,21 +524,32 @@
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('progress').style.width = `100%`;
         
-        // 隱藏全域燈籠，只顯示卡片內的
         document.getElementById('global-lantern-l').style.display = 'none';
         document.getElementById('global-lantern-r').style.display = 'none';
         
         createConfetti();
     }
 
-    // 終極 iOS 修復版：使用 Clone Node + 離屏渲染
+    function trackClick(type) {
+        if (typeof gtag === 'function') {
+            gtag('event', 'click_outbound', { 'destination': type });
+        }
+    }
+
     function generateAndShowImage() {
         const btn = document.getElementById('share-btn');
         const originalText = btn.innerText;
         btn.innerText = "⟳ 製作卡片中...";
         btn.disabled = true;
 
-        // 1. 創建一個臨時容器，用於生成圖片 (避免受當前頁面捲動或樣式影響)
+        if (typeof gtag === 'function') {
+            gtag('event', 'generate_card');
+        }
+
+        const targetElement = document.getElementById('capture-wrapper');
+        // 強制確保截圖區塊是可見的
+        targetElement.style.display = 'block';
+
         const tempContainer = document.createElement('div');
         tempContainer.style.position = 'fixed';
         tempContainer.style.top = '-9999px';
@@ -541,15 +557,9 @@
         tempContainer.style.width = '480px'; // 固定寬度，確保排版一致
         tempContainer.style.zIndex = '-1';
         
-        // 2. 複製目標內容
-        const sourceElement = document.getElementById('capture-wrapper');
-        const clone = sourceElement.cloneNode(true);
-        
-        // 移除 id 避免衝突
+        // 複製目標內容
+        const clone = targetElement.cloneNode(true);
         clone.id = 'capture-clone';
-        
-        // 針對 clone 進行樣式微調 (確保展開)
-        clone.style.display = 'block';
         clone.style.transform = 'none';
         
         // 暫停 clone 內的所有動畫
@@ -566,45 +576,26 @@
         tempContainer.appendChild(clone);
         document.body.appendChild(tempContainer);
 
-        // 3. 執行截圖
-        // iOS Safari 對過大圖片或 scale 會有問題，這裡設定適當的 scale
         html2canvas(clone, {
             backgroundColor: "#fffbf0",
-            scale: 2, // 2倍解析度
+            scale: 2, 
             useCORS: true,
-            logging: false, // 關閉 log 提升效能
-            width: 480, // 強制寬度
-            windowWidth: 480,
-            onclone: (doc) => {
-                // 這裡已經在上面處理過 clone 了，通常不需要再做太多
-            }
+            logging: false,
+            width: 480,
+            windowWidth: 480
         }).then(canvas => {
             const dataUrl = canvas.toDataURL("image/png");
             
-            // 顯示 Modal
             document.getElementById('generated-image').src = dataUrl;
             document.getElementById('image-modal').classList.add('show');
             
-            // 嘗試自動下載 (Android 可能支援)
-            try {
-                const link = document.createElement('a');
-                link.download = '愛盟_過年生存角色.png';
-                link.href = dataUrl;
-                link.click();
-            } catch (e) {
-                // iOS 會攔截，依靠 Modal 手動長按
-            }
-            
-            // 清理
             document.body.removeChild(tempContainer);
-            
-            // 恢復按鈕
             btn.innerText = originalText;
             btn.disabled = false;
 
         }).catch(err => {
-            console.error("截圖失敗:", err);
-            alert("圖片製作遇到問題，請稍後再試 (Error: " + err.message + ")");
+            console.error(err);
+            alert("圖片製作失敗，請重新整理試試！");
             if (document.body.contains(tempContainer)) {
                 document.body.removeChild(tempContainer);
             }
